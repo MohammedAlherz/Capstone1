@@ -112,5 +112,25 @@ public class MerchantStockService {
         }
         return productsByMerchant; // Return the list of products for the specified merchant
     }
+
+    public String getMerchantByProduct(String productId) {
+        for (MerchantStock merchantStock : merchantStocks) {
+            if (merchantStock.getProductId().equals(productId)) {
+                return merchantStock.getMerchantId(); // Return the merchant ID for the specified product
+            }
+        }
+        return null; // No merchant found for the specified product
+    }
+
+    public void increaseStock(String productId, String merchantId) {
+        for (MerchantStock merchantStock : merchantStocks) {
+            if (merchantStock.getProductId().equals(productId) && merchantStock.getMerchantId().equals(merchantId)) {
+                merchantStock.setStock(merchantStock.getStock() + 1);
+                return; // Stock increased successfully
+            }
+        }
+        // If no matching merchant stock found, you might want to handle it differently
+        System.out.println("Merchant stock not found for product: " + productId + " and merchant: " + merchantId);
+    }
 }
 

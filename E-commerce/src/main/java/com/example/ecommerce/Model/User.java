@@ -26,4 +26,5 @@ public class User {
     @Positive(message = "Balance must be a positive number")
     private double balance;
 
+
 }

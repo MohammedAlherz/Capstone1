@@ -18,6 +18,7 @@ public class Product {
     @NotEmpty(message = "Category ID cannot be empty")
     private String categoryId;
 
+    private double ratingStar;
 
     private int timesBought;
 }

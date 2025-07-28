@@ -1,6 +1,5 @@
 package com.example.ecommerce.Service;
 
-import com.example.ecommerce.Model.Product;
 import com.example.ecommerce.Model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +14,8 @@ public class UserService {
 
     ArrayList<User> users = new ArrayList<>();
     HashMap<String, HashMap<String, Integer>> userProductMap = new HashMap<>(); // userId -> (productId -> count)
+    HashMap<String, String>  purchasedCart = new HashMap<>();
+    Map<String, Map<String, Double>> userRatings = new HashMap<>();
 
     private final ProductService productService;
     private final MerchantService merchantService;
@@ -72,7 +73,8 @@ public class UserService {
                                 userProductMap.putIfAbsent(userId, new HashMap<>());
                                 HashMap<String, Integer> userProducts = userProductMap.get(userId);
                                 userProducts.put(productId, userProducts.getOrDefault(productId, 0) + 1);
-                                return "Purchase successful";
+                                purchasedCart.put(userId,productId);
+                                return true;
                             } else {
                                 return "Insufficient balance";
                             }
@@ -121,6 +123,59 @@ public class UserService {
         }
 
         return null;
+    }
+
+    // 7. check if user bought the product
+    public Object rateProduct(String userId, String productId, double rating) {
+        for (Map.Entry<String, String> entry : purchasedCart.entrySet()) {
+            if (entry.getKey().equals(userId) && entry.getValue().equals(productId)) {
+                if (rating > 0 && rating <= 5) {
+                    // Store or update the user's rating
+                    userRatings.putIfAbsent(productId, new HashMap<>());
+                    userRatings.get(productId).put(userId, rating);
+
+                    // Calculate average rating
+                    double avgRating = userRatings.get(productId)
+                            .values()
+                            .stream()
+                            .mapToDouble(Double::doubleValue)
+                            .average()
+                            .orElse(0.0);
+
+                    // Update product's average rating
+                    productService.setRating(avgRating, productId);
+                    return productService.getProductByIdObject(productId);
+                } else {
+                    return "Rating should be between 1 and 5";
+                }
+            }
+        }
+        return "User does not purchase this product / User or product does not exist";
+    }
+
+    // 8. Refund a product
+    public Object refundProduct(String userId, String productId) {
+        for (User user : users) {
+            if (user.getId().equals(userId)) {
+                if (purchasedCart.containsKey(userId) && purchasedCart.get(userId).equals(productId)) {
+                    // Refund the product price to the user's balance
+                    user.setBalance(user.getBalance() + productService.getProductPrice(productId));
+                    // Increase the stock of the merchant
+                    String merchantId = merchantStockService.getMerchantByProduct(productId);
+                    merchantStockService.increaseStock(productId, merchantId);
+                    // Remove the product from user's purchased cart
+                    purchasedCart.remove(userId);
+                    // Remove the product from userProductMap
+                    if (userProductMap.containsKey(userId)) {
+                        userProductMap.get(userId).remove(productId);
+                    }
+                    return "Refund successful";
+                } else {
+                    return "User has not purchased this product";
+                }
+            }
+        }
+        return "User not found";
     }
 
 }

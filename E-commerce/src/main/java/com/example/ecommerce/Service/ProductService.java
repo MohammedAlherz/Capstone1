@@ -1,10 +1,6 @@
 package com.example.ecommerce.Service;
 
-import com.example.ecommerce.Model.MerchantStock;
 import com.example.ecommerce.Model.Product;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -79,14 +75,12 @@ public class ProductService {
     }
 
     // 7. Increment times bought
-    public int incrementTimesBought(String productId) {
+    public void incrementTimesBought(String productId) {
         for (Product product : products) {
             if (product.getId().equals(productId)) {
                 product.setTimesBought(product.getTimesBought() + 1);
-                return product.getTimesBought(); // Return the updated times bought
             }
         }
-        return -1; // Product not found
     }
 
     // 8. Get best-selling product
@@ -104,12 +98,23 @@ public class ProductService {
     }
 
     // 9. Get product by ID as an object
-    public Product getProductByIdObject(String mostPurchasedProductId) {
+    public Product getProductByIdObject(String productId) {
         for (Product product : products) {
-            if (product.getId().equals(mostPurchasedProductId)) {
+            if (product.getId().equals(productId)) {
                 return product; // Return the product object
             }
         }
         return null; // Product not found
     }
+
+    //10. set rating by user
+
+    public void setRating(double rating,String productId){
+        for(Product p:products){
+            if(p.getId().equals(productId)){
+                p.setRatingStar(rating);
+            }
+        }
+    }
+
 }

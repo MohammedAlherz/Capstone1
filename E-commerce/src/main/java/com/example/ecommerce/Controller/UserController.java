@@ -78,7 +78,7 @@ public class UserController {
 
     // 1. Extra Endpoints:
 
-    // 1.2 get highest product bought by user
+    // 1.3 get highest product bought by user
     // Endpoint: GET /api/v1/users/highest-product-bought/{userId}
     // Method: userService.getMostPurchasedProduct(userId)
 
@@ -92,4 +92,30 @@ public class UserController {
         }
     }
 
+    // 1.4 user rate the product if and only if he/she purchased it
+    // Endpoint: PUT /api/v1/users/rating/{userId}/{productId}
+    // Method: userService.rateProduct(userId,productId,rating)
+    @PutMapping("/rating/{userId}/{productId}/{rate}")
+    public ResponseEntity<?> rateProductByUser(@PathVariable String userId,@PathVariable String productId,@PathVariable int rate){
+        Object result = userService.rateProduct(userId,productId,rate);
+        if(result instanceof String){
+            return ResponseEntity.status(400).body(new ApiResponse((String) result));
+        }else{
+            return ResponseEntity.status(200).body(result);
+        }
+    }
+
+    // 1.5 refund the product
+    // Endpoint: POST /api/v1/users/refund/{userId}/{productId}
+    // Method: userService.refundProduct(userId,productId)
+
+    @PostMapping("/refund/{userId}/{productId}")
+    public ResponseEntity<?> refundProduct(@PathVariable String userId, @PathVariable String productId){
+        Object response = userService.refundProduct(userId, productId);
+        if (response instanceof String) {
+            return ResponseEntity.status(400).body(new ApiResponse((String) response));
+        } else {
+            return ResponseEntity.status(200).body(new ApiResponse("Refund successful"));
+        }
+    }
 }
