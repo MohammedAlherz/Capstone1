@@ -90,8 +90,13 @@ public class ProductService {
         }
         Product bestSelling = products.get(0);
         for (Product product : products) {
+
+            if(products.indexOf(product) == 0 && products.size() == 1 && product.getTimesBought() == 0) {
+                //return product empty
+                return null; // If there's only one product, return null as it cannot be compared
+            }; // Skip the first product as it's already assigned
             if (product.getTimesBought() > bestSelling.getTimesBought()) {
-                bestSelling = product;
+                bestSelling = product; // Update best-selling product if current product has more times bought
             }
         }
         return bestSelling;
